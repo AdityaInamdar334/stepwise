@@ -1,17 +1,12 @@
 name: stepwise
 description: A new Flutter project.
 
-# The following line prevents the package from being accidentally published to pub.dev
 publish_to: 'none'
-
-# Version info
 version: 1.0.0+1
 
-# Environment settings
 environment:
   sdk: ^3.6.1
 
-# Dependencies
 dependencies:
   flutter:
     sdk: flutter
@@ -22,7 +17,6 @@ dependencies:
   flutter_local_notifications: ^17.0.0
   timezone: ^0.9.2
 
-# Dev dependencies
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -32,10 +26,11 @@ flutter:
   uses-material-design: true
   assets:
     - lib/assets/logo.png
-    # - lib/assets/your_model.tflite  # Uncomment if you have these
-    # - lib/assets/your_labels.txt    # Uncomment if you have these
+    # Uncomment the following if you have these assets:
+    # - lib/assets/your_model.tflite
+    # - lib/assets/your_labels.txt
 
   fonts:
     - family: GoogleSans
       fonts:
-        - asset: fonts/GoogleSans-Regular.ttf
+        - asset: lib/assets/fonts/GoogleSans-Regular.ttf

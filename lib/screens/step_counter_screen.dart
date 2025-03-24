@@ -1,7 +1,14 @@
 import 'package:flutter/material.dart';
-import '../services/pedometer_service.dart'; // Import the service
-import '../services/permission_service.dart';
+import 'package:pedometer/pedometer.dart';
+import 'dart:async';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:timezone/timezone.dart' as tz; // Corrected import
+import 'package:timezone/data/latest.dart' as tz;
+
+import '../services/pedometer_service.dart';
+import '../services/permission_service.dart';
+import '../services/notification_service.dart';
 
 class StepCounterScreen extends StatefulWidget {
   @override
@@ -11,23 +18,28 @@ class StepCounterScreen extends StatefulWidget {
 class _StepCounterScreenState extends State<StepCounterScreen> {
   final PedometerService _pedometerService = PedometerService();
   final PermissionService _permissionService = PermissionService();
+  final NotificationService _notificationService = NotificationService();
   String _steps = '0';
   String _calories = '0';
   String _distance = '0';
   bool _isWalking = false;
+  StreamSubscription<StepCount>? _stepCountSubscription;
+  final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+  FlutterLocalNotificationsPlugin(); // Add this line
+
 
   @override
   void initState() {
     super.initState();
-    _init(); //call _init
+    _init();
+    _showDailyNotification();
   }
 
-  void _init() async{ //create an async function
+  void _init() async {
     final hasPermission = await _permissionService.checkActivityPermission();
-    if(hasPermission){
+    if (hasPermission) {
       _startStepCounter();
-    }
-    else{
+    } else {
       _requestPermissionAndStart();
     }
   }
@@ -42,16 +54,15 @@ class _StepCounterScreenState extends State<StepCounterScreen> {
   }
 
   void _startStepCounter() {
-    _pedometerService.startListening(); // Start listening using the service
-    // Update the UI with data from the service
+    _pedometerService.startListening();
     setState(() {
       _steps = _pedometerService.steps;
       _calories = _pedometerService.calories;
       _distance = _pedometerService.distance;
     });
 
-    // Listen for changes in the step count and update the UI
-    _pedometerService._stepCountSubscription?.onData((event) {
+    _stepCountSubscription = _pedometerService.stepCountSubscription;
+    _stepCountSubscription?.onData((event) {
       setState(() {
         _steps = _pedometerService.steps;
         _calories = _pedometerService.calories;
@@ -65,21 +76,21 @@ class _StepCounterScreenState extends State<StepCounterScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text("Permission Denied"),
-        content: Text(
+        title: const Text("Permission Denied"),
+        content: const Text(
             "To track your steps, the app needs permission to access your activity data. Please enable it in your device settings."),
         actions: [
           TextButton(
             onPressed: () {
               Navigator.of(context).pop();
             },
-            child: Text("Cancel"),
+            child: const Text("Cancel"),
           ),
           TextButton(
             onPressed: () {
-              openAppSettings(); // Open app settings
+              openAppSettings();
             },
-            child: Text("Open Settings"),
+            child: const Text("Open Settings"),
           ),
         ],
       ),
@@ -90,59 +101,81 @@ class _StepCounterScreenState extends State<StepCounterScreen> {
   void dispose() {
     super.dispose();
     _pedometerService.stopListening();
-    _pedometerService.dispose(); // Clean up the subscription
+    _pedometerService.dispose();
+    _stepCountSubscription?.cancel();
+  }
+
+  Future<void> _showNotification() async {
+    const AndroidNotificationDetails androidNotificationDetails =
+    AndroidNotificationDetails('your_channel_id', 'Your Channel Name',
+        channelDescription: 'Description of your channel',
+        importance: Importance.max,
+        priority: Priority.high,
+        ticker: 'ticker');
+    const NotificationDetails notificationDetails =
+    NotificationDetails(android: androidNotificationDetails);
+    await flutterLocalNotificationsPlugin.show(
+        0,
+        'Step Goal Achieved!',
+        'You have reached your daily step goal!',
+        notificationDetails,
+        payload: 'item x');
+  }
+
+  Future<void> _showDailyNotification() async {
+    await _notificationService.showDailyNotification();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Step Counter'),
+        title: const Text('Step Counter'),
       ),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Text(
+            const Text(
               'Steps:',
               style: TextStyle(fontSize: 24),
             ),
             Text(
               _steps,
-              style: TextStyle(fontSize: 48, fontWeight: FontWeight.bold),
+              style: const TextStyle(fontSize: 48, fontWeight: FontWeight.bold),
             ),
-            SizedBox(height: 20),
-            Text(
+            const SizedBox(height: 20),
+            const Text(
               'Calories:',
               style: TextStyle(fontSize: 24),
             ),
             Text(
               _calories,
-              style: TextStyle(fontSize: 36),
+              style: const TextStyle(fontSize: 36),
             ),
-            SizedBox(height: 20),
-            Text(
+            const SizedBox(height: 20),
+            const Text(
               'Distance (meters):',
               style: TextStyle(fontSize: 24),
             ),
             Text(
               _distance,
-              style: TextStyle(fontSize: 36),
+              style: const TextStyle(fontSize: 36),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
                 if (_isWalking) {
                   _showNotification();
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
+                    const SnackBar(
                       content: Text("Great job! Keep walking!"),
                       duration: Duration(seconds: 2),
                     ),
                   );
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
+                    const SnackBar(
                       content: Text("Start walking to track your steps!"),
                       duration: Duration(seconds: 2),
                     ),
@@ -156,20 +189,5 @@ class _StepCounterScreenState extends State<StepCounterScreen> {
       ),
     );
   }
-
-  Future<void> _showNotification() async {
-    //moved the function here
-    const AndroidNotificationDetails androidNotificationDetails =
-    AndroidNotificationDetails('your_channel_id', 'Your Channel Name',
-        channelDescription: 'Description of your channel',
-        importance: Importance.max,
-        priority: Priority.high,
-        ticker: 'ticker');
-    const NotificationDetails notificationDetails =
-    NotificationDetails(android: androidNotificationDetails);
-    await flutterLocalNotificationsPlugin.show(
-        0, 'Step Goal Achieved!', 'You have reached your daily step goal!',
-        notificationDetails,
-        payload: 'item x');
-  }
 }
+

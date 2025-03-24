@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
-
-import 'step_counter_screen.dart'; // Import your step counter screen
+import 'step_counter_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   @override
@@ -16,7 +15,7 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   void _navigateToMainScreen() {
-    Timer(Duration(seconds: 3), () {
+    Timer(const Duration(seconds: 3), () {
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(builder: (context) => StepCounterScreen()),
       );
@@ -37,8 +36,8 @@ class _SplashScreenState extends State<SplashScreen> {
               width: 150,
               height: 150,
             ),
-            SizedBox(height: 20),
-            Text(
+            const SizedBox(height: 20),
+            const Text(
               'AI Fitness Tracker', // Customize app name
               style: TextStyle(
                 fontSize: 28,
@@ -46,8 +45,8 @@ class _SplashScreenState extends State<SplashScreen> {
                 color: Colors.white,
               ),
             ),
-            SizedBox(height: 10),
-            Text(
+            const SizedBox(height: 10),
+            const Text(
               'Loading...',
               style: TextStyle(fontSize: 16, color: Colors.white),
             ),

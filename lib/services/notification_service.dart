@@ -1,6 +1,8 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest.dart' as tz;
+import 'package:flutter/material.dart'; // Import for the showDialog
+
 
 class NotificationService {
   final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
@@ -10,31 +12,24 @@ class NotificationService {
   Future<void> init() async {
     // Initialize timezone
     tz.initializeTimeZones();
-    tz.setLocalLocation(tz.getLocation('America/New_York')); // Replace with your timezone.
+    tz.setLocalLocation(tz.getLocation('America/New_York'));
 
-    // Android initialization settings
     const AndroidInitializationSettings initializationSettingsAndroid =
-    AndroidInitializationSettings('app_icon'); //  Replace 'app_icon' with the name of your app's icon in the `android/app/src/main/res/drawable` folder.
-
-    // iOS initialization settings (you can customize these if needed)
-    //const DarwinInitializationSettings initializationSettingsIOS =
-    //    DarwinInitializationSettings(
-    //  requestAlertPermission: true,
-    //  requestBadgePermission: true,
-    //  requestSoundPermission: true,
-    //);
-
-    // Combine initialization settings
+    AndroidInitializationSettings('app_icon');
+    const DarwinInitializationSettings initializationSettingsIOS =
+    DarwinInitializationSettings(
+      requestAlertPermission: false,
+      requestBadgePermission: false,
+      requestSoundPermission: false,
+    );
     const InitializationSettings initializationSettings =
-    InitializationSettings(android: initializationSettingsAndroid);
-    //    iOS: initializationSettingsIOS);
-
-    await flutterLocalNotificationsPlugin.initialize(initializationSettings,onSelectNotification: (String? payload) async {
-          if (payload != null) {
-            print('notification payload: $payload');
-          }
-          // Handle notification tap (e.g., navigate to a specific screen)
-        });
+    InitializationSettings(
+      android: initializationSettingsAndroid,
+      iOS: initializationSettingsIOS,
+    );
+    await flutterLocalNotificationsPlugin.initialize(
+      initializationSettings,
+    );
   }
 
   // Show a simple notification
@@ -45,44 +40,57 @@ class NotificationService {
     String? payload,
   }) async {
     const AndroidNotificationDetails androidNotificationDetails =
-    AndroidNotificationDetails('your_channel_id', 'Your Channel Name',
-        channelDescription: 'Description of your channel',
-        importance: Importance.max,
-        priority: Priority.high,
-        ticker: 'ticker');
+    AndroidNotificationDetails(
+      'C_ID',
+      'C_Name',
+      channelDescription: 'Description of your channel', // Added channel description.
+      importance: Importance.max,
+      priority: Priority.high,
+      ticker: 'ticker',
+    );
     const NotificationDetails notificationDetails =
     NotificationDetails(android: androidNotificationDetails);
-    await flutterLocalNotificationsPlugin.show(id, title, body, notificationDetails,
-        payload: payload);
+    await flutterLocalNotificationsPlugin.show(
+      id,
+      title,
+      body,
+      notificationDetails,
+      payload: payload,
+    );
   }
 
   // Show a daily notification at 10 AM
   Future<void> showDailyNotification() async {
-    await flutterLocalNotificationsPlugin.zonedSchedule(
-      0, // Notification ID
-      'Daily Step Reminder', // Title
-      'Remember to take a walk and stay healthy!', // Body
-      _nextInstanceOfTenAM(), // Schedule for 10 AM daily
-      const NotificationDetails(
-        android: AndroidNotificationDetails(
-          'daily_reminder_channel_id', // Channel ID
-          'Daily Reminder Channel', // Channel Name
-          channelDescription: 'Channel for daily step reminders', // Channel Description
-          importance: Importance.defaultImportance,
-          priority: Priority.defaultPriority,
-          ticker: 'ticker',
+    try {
+      await flutterLocalNotificationsPlugin.zonedSchedule(
+        0,
+        'Daily Step Reminder',
+        'Remember to take a walk and stay healthy!',
+        _nextInstanceOfTenAM(),
+        const NotificationDetails(
+          android: AndroidNotificationDetails(
+            'daily_reminder_channel_id',
+            'Daily Reminder Channel',
+            channelDescription: 'Channel for daily step reminders',
+            importance: Importance.defaultImportance,
+            priority: Priority.defaultPriority,
+            ticker: 'ticker',
+          ),
         ),
-      ),
-      androidAllowWhileIdle: true,
-      uiLocalNotificationDateInterpretation:
-      UILocalNotificationDateInterpretation.absoluteTime,
-      matchDateTimeComponents: DateTimeComponents.time, // Ensure the time is matched
-    );
+        androidAllowWhileIdle: true,
+        uiLocalNotificationDateInterpretation:
+        UILocalNotificationDateInterpretation.absoluteTime,
+        matchDateTimeComponents: DateTimeComponents.time,
+      );
+    } catch (e) {
+      print("Error showing daily notification: $e"); //important
+    }
   }
 
   tz.TZDateTime _nextInstanceOfTenAM() {
     final now = tz.TZDateTime.now(tz.local);
-    var scheduledTime = tz.TZDateTime(tz.local, now.year, now.month, now.day, 10); // 10:00 AM
+    var scheduledTime =
+    tz.TZDateTime(tz.local, now.year, now.month, now.day, 10);
     if (scheduledTime.isBefore(now) || scheduledTime.isAtSameMomentAs(now)) {
       scheduledTime = scheduledTime.add(const Duration(days: 1));
     }
@@ -99,4 +107,3 @@ class NotificationService {
     await flutterLocalNotificationsPlugin.cancelAll();
   }
 }
-
