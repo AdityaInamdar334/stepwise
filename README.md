@@ -93,7 +93,7 @@ lib/main.dart            # Entry point of the applicationscreens/splash_screen.d
 * [flutter\_local\_notifications](https://pub.dev/packages/flutter_local_notifications): For displaying local notifications.
 * [timezone](https://pub.dev/packages/timezone): For handling timezones.
 * [google\_fonts](https://pub.dev/packages/google_fonts): For using the Google Sans font.
-    #   tflite: ^1.1.2  # For TensorFlow Lite (Add this if you are using AI)
+    #   tflite: ^1.1.2  # For TensorFlow Lite (Add this if you are using AI)....[upcoming feature in progress]
 
 ##  Contributions
 
