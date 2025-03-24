@@ -21,14 +21,23 @@ lib/main.dart            # Entry point of the applicationscreens/splash_screen.d
 ## Core Components
 
 * **`main.dart`**:  Initializes the app, sets up services, and defines the main route.
+  
 * **`screens/splash_screen.dart`**:  Displays a splash screen on app startup and navigates to the main screen.
+  
 * **`screens/step_counter_screen.dart`**:  Displays step count, calories, and distance.  Requests permissions and interacts with the `PedometerService`.
+  
 * **`services/pedometer_service.dart`**:  Manages the `pedometer` plugin to get step count data.
+  
 * **`services/permission_service.dart`**:  Uses the `permission_handler` plugin to request activity recognition permission.
+  
 * **`services/notification_service.dart`**:  Uses the `flutter_local_notifications` plugin to schedule and display local notifications.
+  
 * **`models/step_data.dart`**:  (Optional) Defines a data model for step information.
+  
 * **`utils/helper_functions.dart`**:  Contains helper functions (e.g., for calculations).
+  
 * **`widgets/custom_button.dart`**:  A reusable custom button widget with customizable appearance.
+  
 * **`assets/`**:  Contains the app's logo, and optionally, AI model files.
 
 ## Getting Started
