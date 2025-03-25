@@ -44,8 +44,8 @@ lib/main.dart            # Entry point of the applicationscreens/splash_screen.d
 
 1.  **Clone the repository:**
     ```bash
-    git clone <your_repository_url>
-    cd your_project_directory
+    git clone https://github.com/AdityaInamdar334/stepwise.git
+    cd stepwise
     ```
 
 2.  **Install Flutter:** Ensure you have the Flutter SDK installed on your system.  See the [official Flutter installation guide](https://flutter.dev/docs/get-started/install).
